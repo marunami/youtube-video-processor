@@ -1,7 +1,7 @@
 name: YouTube Video Processor
 
 on:
-  workflow_dispatch:  # Allows manual trigger via API
+  workflow_dispatch:
     inputs:
       video_url:
         description: 'YouTube Video URL'
@@ -15,6 +15,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Create videos directory
+        run: mkdir -p videos
+
       - name: Install Dependencies
         run: |
           sudo apt update
@@ -24,8 +27,10 @@ jobs:
       - name: Download YouTube Video (Using Cookies)
         run: |
           echo "${{ secrets.YOUTUBE_COOKIES }}" > youtube_cookies.txt
-          yt-dlp --cookies youtube_cookies.txt -o "videos/input.mp4" "${{ github.event.inputs.video_url }}"
+          yt-dlp --cookies youtube_cookies.txt -o "videos/input.%(ext)s" "${{ github.event.inputs.video_url }}"
 
+      - name: Verify video download
+        run: ls -l videos/ && test -f videos/input.mp4
 
       - name: Convert Video to MP4
         run: |
