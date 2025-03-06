@@ -21,10 +21,11 @@ jobs:
           sudo apt install -y ffmpeg
           pip install yt-dlp
 
-      - name: Download YouTube Video
+      - name: Download YouTube Video (Using Cookies)
         run: |
-          mkdir -p videos
-          yt-dlp -f best -o "videos/input.mp4" "${{ github.event.inputs.video_url }}"
+          echo "${{ secrets.YOUTUBE_COOKIES }}" > youtube_cookies.txt
+          yt-dlp --cookies youtube_cookies.txt -o "videos/input.mp4" "${{ github.event.inputs.video_url }}"
+
 
       - name: Convert Video to MP4
         run: |
