@@ -6,6 +6,11 @@ on:
       video_url:
         description: 'YouTube Video URL'
         required: true
+      job_id:
+        description: 'Unique job ID from WP plugin'
+        required: false   # or true, if you must
+
+
 
 jobs:
   process_video:
@@ -53,3 +58,13 @@ jobs:
       - name: Get Download Link
         run: |
           echo "Download your video from: https://github.com/${{ github.repository }}/releases/latest/download/output.mp4"
+
+      - name: Notify WordPress Webhook
+        run: |
+          curl -X POST \
+               -H "Content-Type: application/json" \
+               -H "X-Exco-Secret: ${{ secrets.WEBHOOK_SECRET }}" \
+               -d "{\"job_id\": \"${{ github.event.inputs.job_id }}\",\"mp4_url\":\"https://github.com/${{ github.repository }}/releases/download/latest/output.mp4\"}" \
+               https://coppercourier.org/wp-json/exco/v1/video-webhook
+
+
