@@ -1,0 +1,45 @@
+name: YouTube Video Processor
+
+on:
+  workflow_dispatch:  # Allows manual trigger via API
+    inputs:
+      video_url:
+        description: 'YouTube Video URL'
+        required: true
+
+jobs:
+  process_video:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y ffmpeg
+          pip install yt-dlp
+
+      - name: Download YouTube Video
+        run: |
+          mkdir -p videos
+          yt-dlp -f best -o "videos/input.mp4" "${{ github.event.inputs.video_url }}"
+
+      - name: Convert Video to MP4
+        run: |
+          ffmpeg -i "videos/input.mp4" -c:v libx264 -c:a aac -movflags +faststart "videos/output.mp4"
+
+      - name: Upload Processed Video to GitHub Releases
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "videos/output.mp4"
+          tag_name: latest
+          name: "Processed Video"
+          body: "Here is your processed video."
+          draft: false
+          prerelease: false
+
+      - name: Get Download Link
+        run: |
+          echo "Download your video from: https://github.com/${{ github.repository }}/releases/latest/download/output.mp4"
