@@ -46,6 +46,9 @@ jobs:
           body: "Here is your processed video."
           draft: false
           prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
 
       - name: Get Download Link
         run: |
